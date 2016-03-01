@@ -150,6 +150,8 @@ hr {
   -ms-touch-action: none;
   touch-action: none;
   background: #bbada0;
+  background-image: url(../meta/161cq.jpg);
+  background-size: 100%;
   border-radius: 6px;
   width: 500px;
   height: 500px;
@@ -220,7 +222,7 @@ hr {
   margin-right: 15px;
   float: left;
   border-radius: 3px;
-  background: rgba(238, 228, 218, 0.35); }
+  background: rgba(192, 192, 192, 1); } /*color of empty cell*/
   .grid-cell:last-child {
     margin-right: 0; }
 
@@ -756,3 +758,12 @@ hr {
     margin-top: 90px !important; }
   .game-message .lower {
     margin-top: 30px !important; } }
+
+  .asif-container{
+    width: 500px;
+    height: 500px;
+  }
+
+  .asif {
+    width: 100%;
+  }

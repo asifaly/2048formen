@@ -1,5 +1,6 @@
 function Grid(size, previousState) {
   this.size = size;
+  //populate the grid based on a previous saved state or empty state
   this.cells = previousState ? this.fromState(previousState) : this.empty();
 }
 
@@ -34,6 +35,7 @@ Grid.prototype.fromState = function (state) {
 };
 
 // Find the first available random position
+// computes the random available cells for putting in the new tile
 Grid.prototype.randomAvailableCell = function () {
   var cells = this.availableCells();
 
@@ -42,6 +44,7 @@ Grid.prototype.randomAvailableCell = function () {
   }
 };
 
+//finds which cells are available to put the next tile
 Grid.prototype.availableCells = function () {
   var cells = [];
 

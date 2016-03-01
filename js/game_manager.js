@@ -9,7 +9,8 @@ function GameManager(size, InputManager, Actuator, StorageManager) {
   this.inputManager.on("move", this.move.bind(this));
   this.inputManager.on("restart", this.restart.bind(this));
   this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
-
+  this.highesttile = 0;
+  this.opacity = 1;
   this.setup();
 }
 
@@ -44,7 +45,7 @@ GameManager.prototype.setup = function () {
     this.won         = previousState.won;
     this.keepPlaying = previousState.keepPlaying;
   } else {
-    this.grid        = new Grid(this.size);
+    this.grid        = new Grid(this.size); //creates a new grid object
     this.score       = 0;
     this.over        = false;
     this.won         = false;
@@ -60,16 +61,25 @@ GameManager.prototype.setup = function () {
 
 // Set up the initial tiles to start the game with
 GameManager.prototype.addStartTiles = function () {
+
   for (var i = 0; i < this.startTiles; i++) {
     this.addRandomTile();
   }
+  //when game is lost and restarted set the opacity back to 1
+  var elem = document.getElementsByClassName("grid-cell");
+  for (var i = 0; i < elem.length; i++) {
+    elem[i].style.background = "rgba(192,192,192,1)" ;
+}
 };
 
 // Adds a tile in a random position
 GameManager.prototype.addRandomTile = function () {
+  //check if empty cell is available
   if (this.grid.cellsAvailable()) {
+    //decide the value of the cell
     var value = Math.random() < 0.9 ? 2 : 4;
-    var tile = new Tile(this.grid.randomAvailableCell(), value);
+    //place the tile with value in the randomAvailableCell
+    var tile = new Tile(this.grid.randomAvailableCell(), value); //goes to grid object
 
     this.grid.insertTile(tile);
   }
@@ -126,7 +136,36 @@ GameManager.prototype.moveTile = function (tile, cell) {
   tile.updatePosition(cell);
 };
 
+GameManager.prototype.setOpacity = function (value) {
+  var rgba = "";
+  if (this.highesttile < value ){
+    this.highesttile = value;
+    this.opacity -= 0.1;
+    rgba = "rgba(192,192,192," + this.opacity.toPrecision(2).toString() + ")"
+    // console.log("Highest tile " + this.highesttile)
+    var elem = document.getElementsByClassName("grid-cell");
+    // console.log(elem);
+    for (var i = 0; i < elem.length; i++) {
+      elem[i].style.background = rgba;
+      // console.log(rgba);
+  }
+  if (this.highesttile == 2048) {
+    /* for demo only
+    var elem = document.getElementsByClassName("grid-cell");
+    console.log(elem);
+    for (var i = 0; i < elem.length; i++) {
+      elem[i].style.background = "rgba(192,192,192,0)";
+      console.log(rgba);
+  } */
+    var elem1 = document.querySelector(".game-container");
+    elem1.style.backgroundImage = "url(../meta/161or.jpg)";
+  }
+  }
+};
+
 // Move tiles on the grid in the specified direction
+
+//after emit this is executed...the "move" action relates to this probably
 GameManager.prototype.move = function (direction) {
   // 0: up, 1: right, 2: down, 3: left
   var self = this;
@@ -165,6 +204,11 @@ GameManager.prototype.move = function (direction) {
 
           // Update the score
           self.score += merged.value;
+
+          /*[Asif] - Check if the merged value is undefined and if not undefined
+          pass it on to setOpacity, this check is required because initially when
+          2 tiles they are unmerged & throw error*/
+          merged.value !== undefined ? self.setOpacity(merged.value) : "";
 
           // The mighty 2048 tile
           if (merged.value === 2048) self.won = true;

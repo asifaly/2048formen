@@ -1,6 +1,7 @@
 function KeyboardInputManager() {
   this.events = {};
 
+  //something for ie keypress handling probably
   if (window.navigator.msPointerEnabled) {
     //Internet Explorer 10 style
     this.eventTouchstart    = "MSPointerDown";
@@ -15,6 +16,7 @@ function KeyboardInputManager() {
   this.listen();
 }
 
+//what does this do
 KeyboardInputManager.prototype.on = function (event, callback) {
   if (!this.events[event]) {
     this.events[event] = [];
@@ -22,6 +24,7 @@ KeyboardInputManager.prototype.on = function (event, callback) {
   this.events[event].push(callback);
 };
 
+//what does this do
 KeyboardInputManager.prototype.emit = function (event, data) {
   var callbacks = this.events[event];
   if (callbacks) {
@@ -31,9 +34,11 @@ KeyboardInputManager.prototype.emit = function (event, data) {
   }
 };
 
+//Listens to the keypresses
 KeyboardInputManager.prototype.listen = function () {
   var self = this;
-
+  /*[Asif] - This maps the keycodes to 4 variables corresponding
+  to each direction */
   var map = {
     38: 0, // Up
     39: 1, // Right
@@ -51,14 +56,18 @@ KeyboardInputManager.prototype.listen = function () {
 
   // Respond to direction keys
   document.addEventListener("keydown", function (event) {
+    /*modifiers is collected to check if user is pressing any of these keys
+    while playing*/
     var modifiers = event.altKey || event.ctrlKey || event.metaKey ||
                     event.shiftKey;
     var mapped    = map[event.which];
 
+    /*if the user isnt pressing any of the modifiers and definitiely
+    pressing on a key then execute the below*/
     if (!modifiers) {
       if (mapped !== undefined) {
         event.preventDefault();
-        self.emit("move", mapped);
+        self.emit("move", mapped); //goes to emit function with 0,1,2,3
       }
     }
 
@@ -68,11 +77,17 @@ KeyboardInputManager.prototype.listen = function () {
     }
   });
 
+
   // Respond to button presses
+
+  //the button appears if the user fails to complete, the try again button
   this.bindButtonPress(".retry-button", this.restart);
+
+  //appears if the user already achieves the 2048 number
   this.bindButtonPress(".restart-button", this.restart);
   this.bindButtonPress(".keep-playing-button", this.keepPlaying);
 
+  //Not Important for now, for mobile devices
   // Respond to swipe events
   var touchStartClientX, touchStartClientY;
   var gameContainer = document.getElementsByClassName("game-container")[0];
@@ -127,16 +142,21 @@ KeyboardInputManager.prototype.listen = function () {
   });
 };
 
+//restarts the game
 KeyboardInputManager.prototype.restart = function (event) {
   event.preventDefault();
+  //calls prototype.emit to restart the game
   this.emit("restart");
 };
 
+//allows user to keep playing
 KeyboardInputManager.prototype.keepPlaying = function (event) {
   event.preventDefault();
+  //calls prototype.emit to allow paying
   this.emit("keepPlaying");
 };
 
+//what does this do
 KeyboardInputManager.prototype.bindButtonPress = function (selector, fn) {
   var button = document.querySelector(selector);
   button.addEventListener("click", fn.bind(this));
