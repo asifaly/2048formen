@@ -62,7 +62,7 @@ GameManager.prototype.setup = function() {
     this.highesttile = 0;
     this.opacity = 1;
     this.setOpacity(this.opacity);
-    this.gameContainer.style.backgroundImage = "url(../meta/161cq.jpg)";
+    this.gameContainer.style.backgroundImage = "url(meta/161cq.jpg)";
     this.addStartTiles();
 
   }
@@ -336,7 +336,7 @@ GameManager.prototype.checkHighest = function(value) {
   //   for (var i = 0; i < this.gridCell.length; i++) {
   //     this.gridCell[i].style.background = "rgba(192,192,192,0)";
   // }
-      this.gameContainer.style.backgroundImage = "url(../meta/161or.jpg)";
+      this.gameContainer.style.backgroundImage = "url(meta/161or.jpg)";
     }
   }
 };
