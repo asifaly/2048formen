@@ -11,12 +11,6 @@ function GameManager(size, InputManager, Actuator, StorageManager) {
   this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
 
   this.setup();
-
-  this.gridCell = document.getElementsByClassName("grid-cell");
-  this.gameContainer = document.querySelector(".game-container")
-  this.highesttile = 0;
-  this.opacity = 1;
-
 }
 
 // Restart the game
@@ -41,6 +35,9 @@ GameManager.prototype.isGameTerminated = function() {
 GameManager.prototype.setup = function() {
   var previousState = this.storageManager.getGameState();
 
+  //get the DOM elements to modify
+  this.gridCell = document.getElementsByClassName("grid-cell");
+  this.gameContainer = document.querySelector(".game-container");
   // Reload the game from a previous game if present
   if (previousState) {
     this.grid = new Grid(previousState.grid.size,
@@ -49,6 +46,11 @@ GameManager.prototype.setup = function() {
     this.over = previousState.over;
     this.won = previousState.won;
     this.keepPlaying = previousState.keepPlaying;
+    //incase game is reloaded from previousState initialize these
+    this.highesttile = previousState.highesttile;
+    this.opacity = previousState.opacity;
+    this.setOpacity(this.opacity);
+
   } else {
     this.grid = new Grid(this.size); //creates a new grid object
     this.score = 0;
@@ -56,10 +58,14 @@ GameManager.prototype.setup = function() {
     this.won = false;
     this.keepPlaying = false;
 
-    // Add the initial tiles
+    //set the opacity and highesttile to 2, when game is initially setup
+    this.highesttile = 0;
+    this.opacity = 1;
+    this.setOpacity(this.opacity);
+    this.gameContainer.style.backgroundImage = "url(../meta/161cq.jpg)";
     this.addStartTiles();
-  }
 
+  }
   // Update the actuator
   this.actuate();
 };
@@ -70,19 +76,6 @@ GameManager.prototype.addStartTiles = function() {
   for (var i = 0; i < this.startTiles; i++) {
     this.addRandomTile();
   }
-  //when game is lost and restarted set the opacity back to 1
-  // var gridCell = document.getElementsByClassName("grid-cell");
-  this.highesttile = 0;
-  this.opacity = 1;
-  this.gridCell = document.getElementsByClassName("grid-cell");
-  this.gameContainer = document.querySelector(".game-container");
-
-  for (var i = 0; i < this.gridCell.length; i++) {
-    this.gridCell[i].style.background = "rgba(192,192,192,1)";
-  }
-
-  this.gameContainer.style.backgroundImage = "url(../meta/161cq.jpg)";
-
 };
 
 // Adds a tile in a random position
@@ -117,6 +110,7 @@ GameManager.prototype.actuate = function() {
     won: this.won,
     bestScore: this.storageManager.getBestScore(),
     terminated: this.isGameTerminated()
+
   });
 
 };
@@ -128,7 +122,10 @@ GameManager.prototype.serialize = function() {
     score: this.score,
     over: this.over,
     won: this.won,
-    keepPlaying: this.keepPlaying
+    keepPlaying: this.keepPlaying,
+    //keep track of highesttile and opacity incase of load from previousState
+    highesttile: this.highesttile,
+    opacity: this.opacity
   };
 };
 
@@ -147,28 +144,6 @@ GameManager.prototype.moveTile = function(tile, cell) {
   this.grid.cells[tile.x][tile.y] = null;
   this.grid.cells[cell.x][cell.y] = tile;
   tile.updatePosition(cell);
-};
-
-GameManager.prototype.setOpacity = function(value) {
-  var rgba = "";
-  if (this.highesttile < value) {
-    this.highesttile = value;
-    this.opacity -= 0.1;
-    rgba = "rgba(192,192,192," + this.opacity.toPrecision(2).toString() + ")";
-
-    for (var i = 0; i < this.gridCell.length; i++) {
-      this.gridCell[i].style.background = rgba;
-    }
-
-    if (this.highesttile == 2048) {
-      /* for demo only
-    for (var i = 0; i < this.gridCell.length; i++) {
-      this.gridCell[i].style.background = "rgba(192,192,192,0)";
-      console.log(rgba);
-  } */
-      this.gameContainer.style.backgroundImage = "url(../meta/161or.jpg)";
-    }
-  }
 };
 
 // Move tiles on the grid in the specified direction
@@ -219,7 +194,7 @@ GameManager.prototype.move = function(direction) {
           /*[Asif] - Check if the merged value is undefined and if not undefined
           pass it on to setOpacity, this check is required because initially when
           2 tiles they are unmerged & throw error*/
-          merged.value !== undefined ? self.setOpacity(merged.value) : "";
+          merged.value !== undefined ? self.checkHighest(merged.value) : "";
 
           // The mighty 2048 tile
           if (merged.value === 2048) self.won = true;
@@ -348,4 +323,30 @@ GameManager.prototype.tileMatchesAvailable = function() {
 
 GameManager.prototype.positionsEqual = function(first, second) {
   return first.x === second.x && first.y === second.y;
+};
+
+//checks the highettile Value and calls setOpacity function
+GameManager.prototype.checkHighest = function(value) {
+  if (this.highesttile < value) {
+    this.highesttile = value;
+    this.opacity -= 0.1;
+    this.setOpacity(this.opacity);
+
+    if (this.highesttile == 2048) {
+  //   for (var i = 0; i < this.gridCell.length; i++) {
+  //     this.gridCell[i].style.background = "rgba(192,192,192,0)";
+  // }
+      this.gameContainer.style.backgroundImage = "url(../meta/161or.jpg)";
+    }
+  }
+};
+
+//function to setOpacity to the tiles
+GameManager.prototype.setOpacity = function (opacity) {
+
+  var color = "rgba(192,192,192," + opacity.toPrecision(2).toString() + ")";
+
+  for (var i = 0; i < this.gridCell.length; i++) {
+    this.gridCell[i].style.background = color;
+  }
 };
